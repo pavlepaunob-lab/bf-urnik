@@ -53,6 +53,11 @@
     <small id="stat"></small>
   </div>
 
+  <div class="card" id="promene-card" hidden>
+    <strong id="promene-naslov"></strong>
+    <ul id="promene-lista" style="padding-left:20px;margin:8px 0 0"></ul>
+  </div>
+
   <div class="card">
     <details open>
       <summary>Android (Google Calendar)</summary>
@@ -102,6 +107,16 @@
   build();
   fetch(base + "status.json").then(r => r.json()).then(s => {
     $("stat").textContent = "Poslednje osvežavanje: " + new Date(s.generisano).toLocaleString("sr-RS");
+  }).catch(() => {});
+  fetch(base + "promene.json").then(r => r.json()).then(p => {
+    const n = p.dodato.length + p.uklonjeno.length;
+    $("promene-card").hidden = false;
+    $("promene-naslov").textContent = n
+      ? `Promene u urniku od početka nedelje ${p.nedelja} (${n}) — sve grupe`
+      : `Nema promena u urniku od početka nedelje ${p.nedelja}`;
+    const ul = $("promene-lista");
+    for (const e of p.dodato) { const li = document.createElement("li"); li.textContent = `+ ${e.pocetak} ${e.naziv}${e.prostor ? " (" + e.prostor + ")" : ""}`; ul.appendChild(li); }
+    for (const e of p.uklonjeno) { const li = document.createElement("li"); li.textContent = `− ${e.pocetak} ${e.naziv}${e.prostor ? " (" + e.prostor + ")" : ""}`; ul.appendChild(li); }
   }).catch(() => {});
 </script>
 </body>
