@@ -1,0 +1,9 @@
+{
+  "name": "bf-urnik",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Filtrirani ICS kalendar za UL BF urnik (Biotehnologija 1. letnik)",
+  "scripts": {
+    "build": "node scripts/build.js"
+  }
+}

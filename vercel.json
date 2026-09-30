@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/urnik.ics", "destination": "/api/urnik" }
+  ],
+  "functions": {
+    "api/urnik.js": { "maxDuration": 30 }
+  }
+}

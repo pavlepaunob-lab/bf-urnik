@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BF Urnik kalendar</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1b1f24; --muted:#5b6470; --accent:#0b6e4f; --border:#d9dee5; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111417; --card:#1a1f24; --text:#e8ecf0; --muted:#9aa5b1; --accent:#3ccf95; --border:#2c343c; } }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:560px; margin:0 auto; }
+  h1 { font-size:1.4rem; margin:8px 0 4px; }
+  p.sub { color:var(--muted); margin:0 0 16px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px; }
+  label { display:block; font-weight:600; margin:10px 0 4px; }
+  select { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font-size:1rem; }
+  .btn { display:block; text-align:center; padding:12px; border-radius:8px; background:var(--accent); color:#fff; text-decoration:none; font-weight:600; margin-top:12px; }
+  .btn.secondary { background:transparent; color:var(--accent); border:1px solid var(--accent); }
+  code { display:block; word-break:break-all; background:var(--bg); padding:10px; border-radius:8px; font-size:.85rem; margin-top:8px; }
+  details { margin-top:8px; } summary { cursor:pointer; font-weight:600; }
+  ol { padding-left:20px; } li { margin:4px 0; }
+  small { color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>BF Urnik → kalendar na telefonu</h1>
+  <p class="sub">Biotehnologija 1. letnik (BTUN). Fajlovi se regenerišu svakog sata sa urniki.bf.uni-lj.si; predavanja, vaje, kolokviji i ispiti, sa podsetnikom 15 min pre.</p>
+
+  <div class="card">
+    <label for="sk">Grupa za laboratorijske vaje (1–5)</label>
+    <select id="sk">
+      <option value="">Sve grupe (bez filtera)</option>
+      <option value="1">Skupina 1</option>
+      <option value="2">Skupina 2</option>
+      <option value="3">Skupina 3</option>
+      <option value="4">Skupina 4</option>
+      <option value="5">Skupina 5</option>
+    </select>
+    <label for="fz">Grupa za fiziku (A/B)</label>
+    <select id="fz">
+      <option value="">Obe</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+    </select>
+
+    <a id="webcal" class="btn" href="#">Dodaj u kalendar (webcal)</a>
+    <a id="gcal" class="btn secondary" href="#" target="_blank" rel="noopener">Dodaj u Google Calendar</a>
+    <a id="dl" class="btn secondary" href="#">Preuzmi .ics (jednokratno)</a>
+    <small>Link za pretplatu:</small>
+    <code id="url"></code>
+    <small id="stat"></small>
+  </div>
+
+  <div class="card">
+    <details open>
+      <summary>Android (Google Calendar)</summary>
+      <ol>
+        <li>Klikni „Dodaj u Google Calendar“ i potvrdi „Add“ (ako se otvori samo aplikacija bez pitanja, otvori ovaj link na računaru u browseru).</li>
+        <li>Kalendar se pojavljuje u Google Calendar aplikaciji na telefonu; uključi ga u podešavanjima ako je sakriven.</li>
+        <li>Obaveštenja: Google Calendar → Settings → (ovaj kalendar) → Notifications → dodaj „15 minutes before“. Google ignoriše podsetnike iz fajla, pa se ovo podešava ručno, jednom.</li>
+        <li>Google osvežava pretplaćene kalendare otprilike na 12–24 h.</li>
+      </ol>
+    </details>
+    <details>
+      <summary>iPhone (Apple Calendar)</summary>
+      <ol>
+        <li>Klikni „Dodaj u kalendar (webcal)“ → „Subscribe“.</li>
+        <li>Settings → Calendar → Accounts → Subscribed Calendars → ovaj kalendar → isključi „Remove Alerts“ da podsetnici iz fajla rade i postavi „Refresh“ na češće.</li>
+      </ol>
+    </details>
+    <details>
+      <summary>Samsung Calendar / Outlook</summary>
+      <ol>
+        <li>Samsung Calendar prikazuje Google kalendare, pa uradi Android korake iznad.</li>
+        <li>Outlook: Add calendar → Subscribe from web → nalepi link iznad.</li>
+      </ol>
+    </details>
+  </div>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+  const base = location.origin + location.pathname.replace(/[^/]*$/, "");
+  function build() {
+    const sk = $("sk").value, fz = $("fz").value;
+    let name = "sve";
+    if (sk) name = "skupina-" + sk + (fz ? "-" + fz : "");
+    const https = base + name + ".ics";
+    const webcal = https.replace(/^https?/, "webcal");
+    $("url").textContent = https;
+    $("webcal").href = webcal;
+    $("dl").href = https;
+    $("gcal").href = "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent(webcal);
+    try { localStorage.setItem("bf-urnik", JSON.stringify({ sk, fz })); } catch (e) {}
+  }
+  try {
+    const s = JSON.parse(localStorage.getItem("bf-urnik") || "null");
+    if (s) { $("sk").value = s.sk || ""; $("fz").value = s.fz || ""; }
+  } catch (e) {}
+  ["sk", "fz"].forEach(id => $(id).addEventListener("input", build));
+  build();
+  fetch(base + "status.json").then(r => r.json()).then(s => {
+    $("stat").textContent = "Poslednje osvežavanje: " + new Date(s.generisano).toLocaleString("sr-RS");
+  }).catch(() => {});
+</script>
+</body>
+</html>
