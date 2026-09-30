@@ -6,7 +6,7 @@ const path = require("path");
 const { filterIcs } = require("../api/urnik.js");
 
 const LETNIK = process.env.LETNIK || "50"; // Biotehnologija 1. letnik (BTUN)
-const REMINDER = parseInt(process.env.OPOMNIK || "15", 10);
+const REMINDER = parseInt(process.env.OPOMNIK || "60", 10);
 const OUT = path.join(__dirname, "..", "public");
 
 const SOURCE = `https://urniki.bf.uni-lj.si/layer_one/${LETNIK}/?export=1&types=standard%2Cspecial%2Creservation`;

@@ -3,7 +3,7 @@
 //   letnik   - id "layer_one" na sajtu (podrazumevano 50 = Biotehnologija 1. letnik BTUN)
 //   skupina  - oznake grupa koje se zadržavaju, npr. "2" ili "2,A" (događaji bez oznake grupe ostaju uvek)
 //   predmeti - šifre predmeta, npr. "BT001,BT002" (ako je zadato, ostali predmeti sa šifrom se izbacuju)
-//   opomnik  - podsetnik u minutima pre početka (podrazumevano 15; 0 = bez podsetnika)
+//   opomnik  - podsetnik u minutima pre početka (podrazumevano 60; 0 = bez podsetnika)
 //   od       - najraniji datum YYYY-MM-DD (podrazumevano početak tekuće akademske godine, 1. 9.)
 //   otkazani - 1 = uključi i otkazane termine (podrazumevano 0)
 
@@ -80,7 +80,7 @@ function filterIcs(ics, opts) {
   const groups = new Set(parseList(opts.skupina));
   const subjects = new Set(parseList(opts.predmeti));
   const from = opts.od ? opts.od.replace(/-/g, "") : academicYearStart(new Date());
-  const reminder = Number.isFinite(opts.opomnik) ? opts.opomnik : 15;
+  const reminder = Number.isFinite(opts.opomnik) ? opts.opomnik : 60;
 
   const kept = [];
   const stats = { total: events.length, groupDropped: 0, subjectDropped: 0, dateDropped: 0 };
@@ -150,7 +150,7 @@ module.exports = async (req, res) => {
     const opts = {
       skupina: q.skupina || "",
       predmeti: q.predmeti || "",
-      opomnik: q.opomnik !== undefined ? parseInt(q.opomnik, 10) : 15,
+      opomnik: q.opomnik !== undefined ? parseInt(q.opomnik, 10) : 60,
       od: /^\d{4}-\d{2}-\d{2}$/.test(q.od || "") ? q.od : "",
     };
     const src = await fetchSource(letnik, q.otkazani === "1");
